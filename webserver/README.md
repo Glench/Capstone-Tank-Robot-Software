@@ -1,2 +1,2 @@
   stub
-  install node, express, socket.io
+  install node, npm, express, socket.io
