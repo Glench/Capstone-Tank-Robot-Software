@@ -1,6 +1,7 @@
 // This is the motor controller code.
 // We send PWM commands to our H-Bridges to control forward/backward motion.
 // See http://arduino.cc/en/Tutorial/PWM for PWM information.
+// TODO: figure out a way to jump the serial queue for emergency stop
 
 int mosfetHighPin = 2; // always keep this one high
 int mosfetDisablePin = 4; // disables the h bridges, usually keep this low
@@ -26,6 +27,7 @@ Motor::Motor(int highPin, int disablePin, int forwardPin, int backwardPin) {
     backwardPin_ = backwardPin_;
 }
 void Motor::move(int speed, boolean direction) {
+    // TODO: add speed normalization
     if (direction_ == forward_) {
         analogWrite(highPin_, 255);
         analogWrite(forwardPin_, speed);
@@ -48,6 +50,7 @@ void Motor::backward(int speed) {
 }
 
 void setup()  {
+    Serial.begin(9600);
 }
 
 void loop()  {
