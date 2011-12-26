@@ -1,33 +1,55 @@
-/*
- Fading
- 
- This example shows how to fade an LED using the analogWrite() function.
- 
- The circuit:
- * LED attached from digital pin 9 to ground.
- 
- Created 1 Nov 2008
- By David A. Mellis
- Modified 17 June 2009
- By Tom Igoe
- 
- http://arduino.cc/en/Tutorial/Fading
- 
- This example code is in the public domain.
- 
- */
+// This is the motor controller code.
+// We send PWM commands to our H-Bridges to control forward/backward motion.
+// See http://arduino.cc/en/Tutorial/PWM for PWM information.
 
-void setup()  { 
-  // nothing happens in setup 
-} 
+int mosfetHighPin = 2; // always keep this one high
+int mosfetDisablePin = 4; // disables the h bridges, usually keep this low
+int mosfetForwardPin = 3;
+int mosfetBackwardPin = 5;
 
-void loop()  { 
- 
-     analogWrite(2, 255);
-     analogWrite(4, 0);
-     analogWrite(3, 20);
-     analogWrite(5, 0);            
-   
+class Motor {
+    int highPin_;
+    int disablePin_;
+    int forwardPin_;
+    int backwardPin_;
+    boolean forward_ = true;
+    boolean backward_ = false;
+    private:
+        void move(int, boolean);
+    public:
+        void forward(int);
+}
+Motor::Motor(int highPin, int disablePin, int forwardPin, int backwardPin) {
+    highPin_ = highPin;
+    disablePin_ = disablePin;
+    forwardPin_ = forwardPin;
+    backwardPin_ = backwardPin_;
+}
+void Motor::move(int speed, boolean direction) {
+    if (direction_ == forward_) {
+        analogWrite(highPin_, 255);
+        analogWrite(forwardPin_, speed);
+        analogWrite(backwardPin_, 0);
+        analogWrite(disable_, 0);
+    } else {
+        analogWrite(highPin_, 255);
+        analogWrite(forwardPin_, 0);
+        analogWrite(backwardPin_, speed);
+        analogWrite(disable_, 0);
+    }
 }
 
+// convenience methods
+void Motor::forward(int speed) {
+    move(forward_, speed);
+}
+void Motor::backward(int speed) {
+    move(backward_, speed);
+}
 
+void setup()  {
+}
+
+void loop()  {
+
+}
