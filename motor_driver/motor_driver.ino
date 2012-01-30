@@ -10,10 +10,10 @@ int ForwardPin_left  = 3;
 int BackwardPin_left = 5;
 
 // right motor
-int HighPin_right     = 2; // always keep this one high
-int DisablePin_right  = 4; // disables the h bridges, usually keep this low
-int ForwardPin_right  = 3;
-int BackwardPin_right = 5;
+int HighPin_right     = 13; // always keep this one high
+int DisablePin_right  = 12; // disables the h bridges, usually keep this low
+int ForwardPin_right  = 11;
+int BackwardPin_right = 10;
 
 
 // http://arduinoetcetera.blogspot.com/2011/01/classes-within-classes-initialiser.html
