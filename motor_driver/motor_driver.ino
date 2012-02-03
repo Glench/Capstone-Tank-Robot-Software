@@ -18,9 +18,6 @@ int ForwardPin_right  = 11;
 int BackwardPin_right = 10;
 
 
-// http://arduinoetcetera.blogspot.com/2011/01/classes-within-classes-initialiser.html
-// TODO: put this class in a .h file
-
 void raise_exception(String message) {
     // since there are no exceptions in Arduino-land, make my own fake exception
     // to send back to the user
@@ -40,21 +37,27 @@ int right_motor_input = 0;
 
 void loop() {
     // only read when available
+
     if (Serial.available() > 0) {
+
         left_motor_input = Serial.read();
         right_motor_input = Serial.read();
 
-        // TODO: probably put this logic in Motor
-        if (left_motor_input > 0) {
-            left_motor.forward(left_motor_input);
-        } else if (left_motor_input < 0) {
-            left_motor.backward(left_motor_input);
-        }
+        // TODO: put this in a loop?
+        for (int i = 0; i < 1000; ++i) {
+               right_motor.backward(1);
+      left_motor.backward(1);
+            if (left_motor_input > 0) {
+                left_motor.forward(left_motor_input);
+            } else if (left_motor_input < 0) {
+                left_motor.backward(left_motor_input);
+            }
 
-        if (right_motor_input > 0) {
-            right_motor.forward(right_motor_input);
-        } else if (right_motor_input < 0) {
-            right_motor.backward(right_motor_input);
+            if (right_motor_input > 0) {
+                right_motor.forward(right_motor_input);
+            } else if (right_motor_input < 0) {
+                right_motor.backward(right_motor_input);
+            }
         }
     }
 }

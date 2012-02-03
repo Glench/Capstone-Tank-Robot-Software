@@ -1,4 +1,4 @@
-#include "Motor.h"
+#include "motor.h"
 #include "Arduino.h"
 Motor::Motor(int highPin, int disablePin, int forwardPin, int backwardPin) {
     highPin_ = highPin;
@@ -42,8 +42,8 @@ void Motor::move(int input, bool direction) {
 
 // convenience methods
 void Motor::forward(int speed) {
-    move(forward_, speed);
+    move(speed, forward_);
 }
 void Motor::backward(int speed) {
-    move(backward_, speed);
+    move(speed, backward_);
 }
