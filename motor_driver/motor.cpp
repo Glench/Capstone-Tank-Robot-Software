@@ -8,25 +8,37 @@ Motor::Motor(int highPin, int disablePin, int forwardPin, int backwardPin) {
 
     forward_ = true;
     backward_ = false;
+    num_speeds_ = 3;
 }
 
-int Motor::normalize_speed(int input) {
-    // for now, have 0, 1, 2, 3
-    // TODO: make this use division instead of constant
-    // probably (number of gradations - input) / 255
-    if (input == 0) {
-        return 0;
-    } else if (input == 1) {
+int Motor::normalize_speed_(int input) {
+    // for now, have 0, 1, 2, 3, 4, 5, 6
+    // TODO: make this use division instead of constants
+    // 255 is 100% duty cycle
+    if (input == 2 || input == 4) {
         return 85; // 255 / 3
-    } else if (input == 2) {
+    } else if (input == 1 || input == 5) {
         return 127; // 255 / 2
-    } else if (input == 3) {
+    } else if (input == 0 || input == 6) {
         return 255; // 255 / 1
+    } else {
+        // remember if -1 over serial, that means nothing found
+        return 0;
     }
 }
 
-void Motor::move(int input, bool direction) {
-    int speed = normalize_speed(input);
+bool Motor::direction_(int input) {
+    // determine the direction the motor should turn
+    if (input >= 0 && input <=2) {
+        return backward_;
+    } else {
+        return forward_;
+    }
+}
+
+void Motor::move(int speed) {
+    speed = normalize_speed(speed);
+    bool direction = direction_(speed);
     if (direction == forward_) {
         analogWrite(highPin_, 255);
         analogWrite(forwardPin_, speed);
@@ -40,10 +52,15 @@ void Motor::move(int input, bool direction) {
     }
 }
 
-// convenience methods
-void Motor::forward(int speed) {
-    move(speed, forward_);
+MotorIterator::MotorIterator(Motor left_motor, Motor right_motor) {
+    left_motor_ = left_motor;
+    right_motor_ = right_motor;
+
+    num_loops_ = 100;
 }
-void Motor::backward(int speed) {
-    move(speed, backward_);
+void MotorIterator::run(int left_input, int right_input) {
+    for (int i = 0; i < num_loops_; ++i) {
+        left_motor_.move(left_input);
+        right_motor_.move(right_input);
+    }
 }

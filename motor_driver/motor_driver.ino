@@ -32,32 +32,12 @@ void setup()  {
 Motor left_motor(HighPin_left, DisablePin_left, ForwardPin_left, BackwardPin_left);
 Motor right_motor(HighPin_right, DisablePin_right, ForwardPin_right, BackwardPin_right);
 
-int left_motor_input = 0;
-int right_motor_input = 0;
+MotorIterator motor_iterator(left_motor, right_motor);
 
 void loop() {
     // only read when available
 
     if (Serial.available() > 0) {
-
-        left_motor_input = Serial.read();
-        right_motor_input = Serial.read();
-
-        // TODO: put this in a loop?
-        for (int i = 0; i < 1000; ++i) {
-               right_motor.backward(1);
-      left_motor.backward(1);
-            if (left_motor_input > 0) {
-                left_motor.forward(left_motor_input);
-            } else if (left_motor_input < 0) {
-                left_motor.backward(left_motor_input);
-            }
-
-            if (right_motor_input > 0) {
-                right_motor.forward(right_motor_input);
-            } else if (right_motor_input < 0) {
-                right_motor.backward(right_motor_input);
-            }
-        }
+        motor_iterator.run(Serial.read(), Serial.read());
     }
 }

@@ -2,6 +2,7 @@
 #define Motor_h
 #include "Arduino.h"
 class Motor {
+    // class responsible for controlling invidual motors
     int highPin_;
     int disablePin_;
     int forwardPin_;
@@ -9,12 +10,23 @@ class Motor {
     // encode forward and backward as true and false
     bool forward_; // true
     bool backward_; // false
+    int num_speeds_;
     private:
-        void move(int, bool);
-        int normalize_speed(int);
+        int normalize_speed_(int);
+        bool direction_(int);
     public:
+        void move(int, bool);
         Motor(int, int, int, int);
-        void forward(int);
-        void backward(int);
+};
+
+class MotorIterator {
+    // class responsible for converting input from arduino to motor commands
+    public:
+        MotorIterator(Motor, Motor);
+        void run(int, int);
+    private:
+        int num_loops_;
+        Motor left_motor_;
+        Motor right_motor_;
 };
 #endif
