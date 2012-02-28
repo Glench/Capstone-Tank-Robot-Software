@@ -1,5 +1,6 @@
 #include "motor.h"
 #include "Arduino.h"
+
 Motor::Motor(int highPin, int disablePin, int forwardPin, int backwardPin) {
     highPin_ = highPin;
     disablePin_ = disablePin;
@@ -37,7 +38,7 @@ bool Motor::direction_(int input) {
 }
 
 void Motor::move(int speed) {
-    speed = normalize_speed(speed);
+    speed = normalize_speed_(speed);
     bool direction = direction_(speed);
     if (direction == forward_) {
         analogWrite(highPin_, 255);
@@ -52,13 +53,18 @@ void Motor::move(int speed) {
     }
 }
 
-MotorIterator::MotorIterator(Motor left_motor, Motor right_motor) {
-    left_motor_ = left_motor;
-    right_motor_ = right_motor;
-
-    num_loops_ = 100;
+// see http://arduinoetcetera.blogspot.com/2011/01/classes-within-classes-initialiser.html
+// for why you need to use an initializer list here
+MotorIterator::MotorIterator(Motor &left_motor, Motor &right_motor): left_motor_(left_motor_), right_motor_(right_motor) {
+    num_loops_ = 1000;
+}
+int MotorIterator::convert_ascii_to_int_(int ascii) {
+    // assuming only 0 through 6 as inputs, no chars
+    return 40 - ascii;
 }
 void MotorIterator::run(int left_input, int right_input) {
+    left_input = convert_ascii_to_int_(left_input);
+    right_input = convert_ascii_to_int_(right_input);
     for (int i = 0; i < num_loops_; ++i) {
         left_motor_.move(left_input);
         right_motor_.move(right_input);

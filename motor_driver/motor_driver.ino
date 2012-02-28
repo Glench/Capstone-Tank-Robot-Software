@@ -18,7 +18,7 @@ int ForwardPin_right  = 11;
 int BackwardPin_right = 10;
 
 
-void raise_exception(String message) {
+void raise_exception(int message) {
     // since there are no exceptions in Arduino-land, make my own fake exception
     // to send back to the user
     Serial.println(message);
@@ -26,6 +26,8 @@ void raise_exception(String message) {
 
 void setup()  {
     Serial.begin(9600);
+//    Serial.buffer(2); // read two chars at a time with SerialEvent
+// TODO: figure out why I don't have this stream to work with
 }
 
 
@@ -35,9 +37,14 @@ Motor right_motor(HighPin_right, DisablePin_right, ForwardPin_right, BackwardPin
 MotorIterator motor_iterator(left_motor, right_motor);
 
 void loop() {
-    // only read when available
 
-    if (Serial.available() > 0) {
-        motor_iterator.run(Serial.read(), Serial.read());
-    }
+}
+
+void serialEvent() {
+    // TODO: figure out why random data is coming off serial port
+    int a = Serial.read();
+    int b = Serial.read();
+    raise_exception(a);
+    raise_exception(b);
+    motor_iterator.run(a, b);
 }

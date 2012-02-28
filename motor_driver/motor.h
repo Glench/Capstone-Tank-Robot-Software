@@ -15,18 +15,19 @@ class Motor {
         int normalize_speed_(int);
         bool direction_(int);
     public:
-        void move(int, bool);
+        void move(int);
         Motor(int, int, int, int);
 };
 
 class MotorIterator {
     // class responsible for converting input from arduino to motor commands
     public:
-        MotorIterator(Motor, Motor);
+        MotorIterator(Motor &left_motor, Motor &right_motor);
         void run(int, int);
     private:
         int num_loops_;
         Motor left_motor_;
         Motor right_motor_;
+        int convert_ascii_to_int_(int);
 };
 #endif
