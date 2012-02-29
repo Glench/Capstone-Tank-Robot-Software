@@ -28,6 +28,6 @@ class MotorIterator {
         int num_loops_;
         Motor left_motor_;
         Motor right_motor_;
-        int convert_ascii_to_int_(int);
+        int normalize_input_(int);
 };
 #endif

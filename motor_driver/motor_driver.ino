@@ -6,7 +6,7 @@
 #include "motor.h"
 
 // left motor
-int HighPin_left     = 2; // always keep this one high
+int HighPin_left     = 2; // always keep this one high, don't need this now
 int DisablePin_left  = 4; // disables the h bridges, usually keep this low
 int ForwardPin_left  = 3;
 int BackwardPin_left = 5;
@@ -15,7 +15,7 @@ int BackwardPin_left = 5;
 int HighPin_right     = 13; // always keep this one high
 int DisablePin_right  = 12; // disables the h bridges, usually keep this low
 int ForwardPin_right  = 11;
-int BackwardPin_right = 10;
+int BackwardPin_right = 6;
 
 
 void raise_exception(int message) {
@@ -26,8 +26,8 @@ void raise_exception(int message) {
 
 void setup()  {
     Serial.begin(9600);
-//    Serial.buffer(2); // read two chars at a time with SerialEvent
-// TODO: figure out why I don't have this stream to work with
+    // sometimes weird data on startup?
+    Serial.flush();
 }
 
 
@@ -37,14 +37,11 @@ Motor right_motor(HighPin_right, DisablePin_right, ForwardPin_right, BackwardPin
 MotorIterator motor_iterator(left_motor, right_motor);
 
 void loop() {
-
 }
 
 void serialEvent() {
-    // TODO: figure out why random data is coming off serial port
-    int a = Serial.read();
-    int b = Serial.read();
-    raise_exception(a);
-    raise_exception(b);
-    motor_iterator.run(a, b);
+    // if 2 or more bytes available, read them together
+    if (Serial.available() > 1) {
+        motor_iterator.run(Serial.read(), Serial.read());
+    }
 }

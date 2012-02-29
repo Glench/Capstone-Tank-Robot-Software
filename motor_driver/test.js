@@ -7,3 +7,6 @@ var sp = new SerialPort("/dev/tty.usbserial-A600cJpP", {
 sp.on('data', function(data) {
     console.log(data);
 });
+
+// sp.write('60');
+// sp.write('30'); // etc

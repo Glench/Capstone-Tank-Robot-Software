@@ -38,35 +38,36 @@ bool Motor::direction_(int input) {
 }
 
 void Motor::move(int speed) {
-    speed = normalize_speed_(speed);
     bool direction = direction_(speed);
+    int new_speed = normalize_speed_(speed);
     if (direction == forward_) {
         analogWrite(highPin_, 255);
-        analogWrite(forwardPin_, speed);
+        analogWrite(forwardPin_, new_speed);
         analogWrite(backwardPin_, 0);
         analogWrite(disablePin_, 0);
     } else {
         analogWrite(highPin_, 255);
         analogWrite(forwardPin_, 0);
-        analogWrite(backwardPin_, speed);
+        analogWrite(backwardPin_, new_speed);
         analogWrite(disablePin_, 0);
     }
 }
 
 // see http://arduinoetcetera.blogspot.com/2011/01/classes-within-classes-initialiser.html
 // for why you need to use an initializer list here
-MotorIterator::MotorIterator(Motor &left_motor, Motor &right_motor): left_motor_(left_motor_), right_motor_(right_motor) {
-    num_loops_ = 1000;
+MotorIterator::MotorIterator(Motor &left_motor, Motor &right_motor): left_motor_(left_motor), right_motor_(right_motor) {
+    num_loops_ = 50;
 }
-int MotorIterator::convert_ascii_to_int_(int ascii) {
-    // assuming only 0 through 6 as inputs, no chars
-    return 40 - ascii;
+int MotorIterator::normalize_input_(int input) {
+    // ascii conversion, only expecting 48-54 (0-6)
+    return input - 48;
 }
 void MotorIterator::run(int left_input, int right_input) {
-    left_input = convert_ascii_to_int_(left_input);
-    right_input = convert_ascii_to_int_(right_input);
-    for (int i = 0; i < num_loops_; ++i) {
-        left_motor_.move(left_input);
-        right_motor_.move(right_input);
+    for (int i = 0; i < num_loops_; i++) {
+        left_motor_.move(normalize_input_(left_input));
+        right_motor_.move(normalize_input_(right_input));
     }
+    // PWM will keep firing until you set it to something else, so stop after
+    left_motor_.move(3);
+    right_motor_.move(3);
 }
