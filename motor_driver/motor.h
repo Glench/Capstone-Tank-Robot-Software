@@ -22,10 +22,10 @@ class Motor {
 class MotorIterator {
     // class responsible for converting input from arduino to motor commands
     public:
-        MotorIterator(Motor &left_motor, Motor &right_motor);
+        MotorIterator(Motor &left_motor, Motor &right_motor, int num_milliseconds);
         void run(int, int);
     private:
-        int num_loops_;
+        int num_milliseconds_;
         Motor left_motor_;
         Motor right_motor_;
         int normalize_input_(int);

@@ -18,12 +18,6 @@ int ForwardPin_right  = 11;
 int BackwardPin_right = 6;
 
 
-void raise_exception(int message) {
-    // since there are no exceptions in Arduino-land, make my own fake exception
-    // to send back to the user
-    Serial.println(message);
-}
-
 void setup()  {
     Serial.begin(9600);
     // sometimes weird data on startup?
@@ -34,7 +28,8 @@ void setup()  {
 Motor left_motor(HighPin_left, DisablePin_left, ForwardPin_left, BackwardPin_left);
 Motor right_motor(HighPin_right, DisablePin_right, ForwardPin_right, BackwardPin_right);
 
-MotorIterator motor_iterator(left_motor, right_motor);
+int num_milliseconds = 250; // how long to run motors for, can play around with this
+MotorIterator motor_iterator(left_motor, right_motor, num_milliseconds);
 
 void loop() {
 }

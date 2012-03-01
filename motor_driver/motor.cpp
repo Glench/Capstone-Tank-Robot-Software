@@ -55,18 +55,19 @@ void Motor::move(int speed) {
 
 // see http://arduinoetcetera.blogspot.com/2011/01/classes-within-classes-initialiser.html
 // for why you need to use an initializer list here
-MotorIterator::MotorIterator(Motor &left_motor, Motor &right_motor): left_motor_(left_motor), right_motor_(right_motor) {
-    num_loops_ = 50;
+MotorIterator::MotorIterator(Motor &left_motor, Motor &right_motor, int num_milliseconds):
+    left_motor_(left_motor),
+    right_motor_(right_motor),
+    num_milliseconds_(num_milliseconds) {
 }
 int MotorIterator::normalize_input_(int input) {
     // ascii conversion, only expecting 48-54 (0-6)
     return input - 48;
 }
 void MotorIterator::run(int left_input, int right_input) {
-    for (int i = 0; i < num_loops_; i++) {
-        left_motor_.move(normalize_input_(left_input));
-        right_motor_.move(normalize_input_(right_input));
-    }
+    left_motor_.move(normalize_input_(left_input));
+    right_motor_.move(normalize_input_(right_input));
+    delay(num_milliseconds_);
     // PWM will keep firing until you set it to something else, so stop after
     left_motor_.move(3);
     right_motor_.move(3);
