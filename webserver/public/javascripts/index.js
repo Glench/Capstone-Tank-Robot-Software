@@ -5,7 +5,8 @@ socket.on('connect', function() {
 });
 
 socket.on('disconnect', function() {
-    console.log('websocket disconnect')
+    console.log('websocket disconnect');
+    // alert('Lost connection with robot!');
 });
 
 // hash of arrow key code and if it's held down
@@ -19,7 +20,7 @@ var keys = {
 
 $(document).keydown(function(evt) {
     if (evt.which in keys && !keys[evt.which]) {
-        console.log('added');
+        evt.preventDefault();
         keys[evt.which] = true;
         keys['should_send'] = true;
     }
@@ -27,14 +28,13 @@ $(document).keydown(function(evt) {
 
 $(document).keyup(function(evt) {
     if (evt.which in keys && keys[evt.which]) {
-        console.log('removed');
+        evt.preventDefault();
         keys[evt.which] = false;
         keys['should_send'] = false;
     }
 });
 
-
-// TODO: set timeout that sets timeout so this runs constantly polling for data
+// TODO: 
 // need mapping for speeds (get from slider) and also translation when holding
 // down forward+left (right needs to go faster) if possible.
 //
@@ -42,8 +42,16 @@ $(document).keyup(function(evt) {
 // as well
 //
 // also update gui to show 4 keys in correct arrow pattern
-var send_commands = function() {
-    if (keys['should_run']) {
+var encoded_movement = {
+    left: 4,
+    right: 4
+};
 
+var send_commands = function() {
+    if (keys['should_send']) {
+        // if the user wants it to go send instructions on websocket
+        socket.emit('move', encoded_movement)
     }
 };
+
+setInterval(send_commands, 100)

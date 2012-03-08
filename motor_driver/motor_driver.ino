@@ -28,7 +28,7 @@ void setup()  {
 Motor left_motor(HighPin_left, DisablePin_left, ForwardPin_left, BackwardPin_left);
 Motor right_motor(HighPin_right, DisablePin_right, ForwardPin_right, BackwardPin_right);
 
-int num_milliseconds = 250; // how long to run motors for, can play around with this
+int num_milliseconds = 100; // how long to run motors for, can play around with this
 MotorIterator motor_iterator(left_motor, right_motor, num_milliseconds);
 
 void loop() {

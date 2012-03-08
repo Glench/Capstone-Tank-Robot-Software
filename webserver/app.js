@@ -75,5 +75,4 @@ app.listen(3000);
 var sio = io.listen(app)
 sio.sockets.on('connection', routes.socket_connection)
 
-
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
