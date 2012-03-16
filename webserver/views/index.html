@@ -3,6 +3,7 @@
     <head>
         <title>TANK ROBUT</title>
         <link rel="stylesheet" href="stylesheets/bootstrap.min.css" />
+        <link rel="stylesheet" href="stylesheets/jquery-ui-1.8.18.custom.css" />
         <style type="text/css">
             #camera {
                 width: 814px;
@@ -23,30 +24,29 @@
                         If this does not load soon, make sure you are on the right network.
                     </iframe>
                 </div>
-                <table class="span5" id="controls">
-                    <thead>
-                        <tr>
-                            <th>Left tread</th>
-                            <th>Right tread</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><a class="btn">&uarr;</a></td>
-                            <td><a class="btn">&uarr;</a></td>
-                        </tr>
-                        <tr>
-                            <td><a class="btn">&darr;</a></td>
-                            <td><a class="btn">&darr;</a></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="span5" id="controls">
+                    <div>
+                        <a style="margin-left: 47px;" class="btn">&uarr;</a>
+                    </div>
+                    <div>
+                        <a class="btn">&larr;</a>
+                        <a class="btn">&darr;</a>
+                        <a class="btn">&rarr;</a>
+                    </div>
+                    <div id="speed"></div>
+                    <div id="speed_labels" style="position: relative;">
+                        <span style="position: absolute; left: 0;">Slow</span>
+                        <span style="position: absolute; left: 119px;">Medium</span>
+                        <span style="position: absolute; left: 268px;">Fast</span>
+                    </div>
+                </div>
             </div>
 
         </div>
 
         <script type="text/javascript" src='/javascripts/jquery-1.7.1.min.js'></script>
         <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+        <script type="text/javascript" src='/javascripts/jquery-ui-1.8.18.custom.min.js'></script>
         <script type="text/javascript" src='/javascripts/index.js'></script>
     </body>
 </html>
