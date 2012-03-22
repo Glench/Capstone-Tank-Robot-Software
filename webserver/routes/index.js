@@ -1,9 +1,9 @@
-var serialport = require('serialport')
-var SerialPort = serialport.SerialPort; // localize object constructor
+// var serialport = require('serialport')
+// var SerialPort = serialport.SerialPort; // localize object constructor
 
-var serial = new SerialPort("/dev/tty.usbserial-A600cJpP", {
-    parser: serialport.parsers.readline("\n")
-});
+// var serial = new SerialPort("/dev/tty.usbserial-A600cJpP", {
+//     parser: serialport.parsers.readline("\n")
+// });
 
 /*
  * GET home page.
@@ -30,6 +30,6 @@ exports.socket_connection = function(socket){
     socket.on('move', function (data) {
         console.log('movement command received', new Date(), data);
         // make sure to write string and not numberic values
-        serial.write('' + data['left'] + data['right']);
+        // serial.write('' + data['left'] + data['right']);
     });
 };
