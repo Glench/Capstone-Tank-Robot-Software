@@ -8,5 +8,6 @@
     , "socket.io": ">= 0.0.1"
     , "mustache": ">= 0.0.1"
     , "sqlite3": ">=2.1.1"
+    , "serialport": ">=0.3.0"
   }
 }
