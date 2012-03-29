@@ -4,10 +4,10 @@ var serialport = require('serialport')
 var SerialPort = serialport.SerialPort; // localize object constructor
 
 var config = {
-    motor_serial: "/dev/tty.usbserial-A600cJpP",
+    motor_serial: '/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A600cJpP-if00-port0', // "/dev/tty.usbserial-A600cJpP",
     gps_serial: '/dev/cu.usbserial-A40111OI',
     camera_ip: '192.168.1.2',
-    motor_on: false,
+    motor_on: true,
     gps_on: false
 };
 

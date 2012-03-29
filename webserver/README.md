@@ -1,2 +1,2 @@
   stub
-  install node, npm, express, socket.io
+  npm install inside this directory
