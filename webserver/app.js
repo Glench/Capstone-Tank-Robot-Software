@@ -68,6 +68,7 @@ app.configure('production', function(){
 // Routes
 
 app.get('/', routes.index);
+app.get('/gps', routes.get_gps);
 
 app.listen(3000);
 
