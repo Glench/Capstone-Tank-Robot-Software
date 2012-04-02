@@ -1,7 +1,12 @@
 var socket = io.connect('http://localhost')
+var coordinates = [];
 
 socket.on('connect', function() {
     console.log('websocket connect')
+});
+
+socket.on('gps_coordinate', function(data) {
+    coordinates.push(data)
 });
 
 socket.on('disconnect', function() {
@@ -121,10 +126,15 @@ $('#controls .btn').mouseup(function(evt) {
 $('#map .btn').click(function(evt) {
     socket.emit('deploy_repeater');
 })
+$('a[href$="#null"]').click(function(evt){
+    evt.preventDefault();
+    $(evt.target).blur();
+});
 
 // TODO:
 // fix left and right
 // fix forward to forward/left to forward
+// fix annoying left and right buttons after changing speed (defocus)
 
 var send_commands = function() {
     if (inputs['should_send']) {
