@@ -77,6 +77,11 @@ var translate_inputs_to_directions = function(speed, inputs) {
 };
 
 $(document).keydown(function(evt) {
+    // prevent scrolling when holding down arrow keys
+    evt.preventDefault();
+});
+
+$(document).keydown(function(evt) {
     var direction = key_map[evt.which];
     if (direction in inputs && !inputs[direction]) {
         evt.preventDefault();
@@ -93,10 +98,32 @@ $(document).keyup(function(evt) {
         inputs['should_send'] = false;
     }
 });
+$('#controls .btn').mousedown(function(evt) {
+    var $btn = $(evt.target);
+    var direction = key_map[$btn.data('key')];
+    if (direction in inputs && !inputs[direction]) {
+        evt.preventDefault();
+        inputs[direction] = true;
+        inputs['should_send'] = true;
+        console.log(inputs)
+    }
+});
+$('#controls .btn').mouseup(function(evt) {
+    var $btn = $(evt.target);
+    var direction = key_map[$btn.data('key')];
+    if (direction in inputs && inputs[direction]) {
+        evt.preventDefault();
+        inputs[direction] = false;
+        inputs['should_send'] = false;
+        console.log(inputs)
+    }
+});
+$('#map .btn').click(function(evt) {
+    socket.emit('deploy_repeater');
+})
 
-// TODO: 
+// TODO:
 // fix left and right
-// stop from scrolling
 // fix forward to forward/left to forward
 
 var send_commands = function() {
