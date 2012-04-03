@@ -1,5 +1,5 @@
-var socket = io.connect('http://localhost')
 var coordinates = [];
+var socket = io.connect('http://192.168.10.220')
 
 socket.on('connect', function() {
     console.log('websocket connect')
