@@ -7,7 +7,7 @@
 #include "Servo.h"
 
 // left motor
-int HighPin_left     = 2; // always keep this one high, don't need this now
+int HighPin_left     = 1; // always keep this one high, don't need this now
 int DisablePin_left  = 4; // disables the h bridges, usually keep this low
 int ForwardPin_left  = 3;
 int BackwardPin_left = 5;
