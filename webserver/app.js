@@ -99,14 +99,24 @@ sio.sockets.on('connection', function(socket) {
         console.log('movement command received', new Date(), data);
         // make sure to write string and not numberic values
         if (config.motor_on) {
-            motor_serial.write('' + data['left'] + data['right']);
+            motor_serial.write('' + data['left'] + data['right'] + '0');
         }
     });
 
     socket.on('deploy_repeater', function(data) {
         console.log('deploy repeater command received', new Date())
-        // db.run('UPDATE gps SET is_repeater = 1 ORDER BY id DESC LIMIT 1');
-        // TODO have to actually send a command to the microcontroller
+        // workaround for not having update order by or limit support
+        db.get('SELECT id FROM gps order by id desc limit 1', function(err, row){
+            if (row) {
+                db.run('UPDATE gps SET is_repeater = 1 where id = ?', row.id);
+            }
+        });
+
+        if (config.motor_on) {
+            db.all('select * from gps where is_repeater = 1', function(err, rows) {
+                motor_serial.write('00' + (rows.length+1))
+            });
+        }
     });
 });
 
@@ -124,7 +134,6 @@ var GpsCoordinates = function(params) {
         },
         insert_callback: function(error) {
             // this.lastID contains id of insert
-            // TODO: send this data on websocket
             if (!error) {
                 db.get('select * from gps where id = ?', this.lastID, function(err, row) {
                     sio.sockets.emit('gps_coordinate', row);

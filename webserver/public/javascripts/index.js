@@ -1,5 +1,6 @@
 var coordinates = [];
 var socket = io.connect('http://192.168.10.220')
+// var socket = io.connect('http://localhost')
 
 socket.on('connect', function() {
     console.log('websocket connect')
@@ -83,7 +84,9 @@ var translate_inputs_to_directions = function(speed, inputs) {
 
 $(document).keydown(function(evt) {
     // prevent scrolling when holding down arrow keys
-    evt.preventDefault();
+    if (evt.which in key_map) {
+        evt.preventDefault();
+    }
 });
 
 $(document).keydown(function(evt) {

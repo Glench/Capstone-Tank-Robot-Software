@@ -4,7 +4,7 @@
 // TODO: figure out a way to jump the serial queue for emergency stop
 
 #include "motor.h"
-// #include "Servo.h"
+#include "Servo.h"
 
 // left motor
 int HighPin_left     = 2; // always keep this one high, don't need this now
@@ -18,15 +18,15 @@ int DisablePin_right  = 12; // disables the h bridges, usually keep this low
 int ForwardPin_right  = 11;
 int BackwardPin_right = 6;
 
-// Servo servo;
-// in setup: servo.attach(pin) servo.write(angle from 0 to 180)
+// solenoids
+int repeater_1_pin = A0;
+int repeater_2_pin = A1;
+
 void setup()  {
     Serial.begin(9600);
     // sometimes weird data on startup?
     Serial.flush();
 }
-
-
 
 Motor left_motor(HighPin_left, DisablePin_left, ForwardPin_left, BackwardPin_left);
 Motor right_motor(HighPin_right, DisablePin_right, ForwardPin_right, BackwardPin_right);
@@ -39,7 +39,17 @@ void loop() {
 
 void serialEvent() {
     // if 2 or more bytes available, read them together
-    if (Serial.available() > 1) {
+    if (Serial.available() > 2) {
         motor_iterator.run(Serial.read(), Serial.read());
+        int solenoid = Serial.read();
+        if (solenoid == 1) {
+            digitalWrite(repeater_1_pin, 255);
+            delay(1000*3);
+            digitalWrite(repeater_1_pin, 0);
+        } else if (solenoid == 2) {
+            digitalWrite(repeater_1_pin, 255);
+            delay(1000*3);
+            digitalWrite(repeater_2_pin, 0);
+        }
     }
 }
