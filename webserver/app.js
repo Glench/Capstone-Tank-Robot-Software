@@ -76,9 +76,9 @@ app.get('/', routes.index);
 
 // local config
 var config = {
-    motor_serial: "/dev/tty.usbserial-A600cJpP",
+    motor_serial: "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A600cJpP-if00-port0",
     gps_serial: '/dev/cu.usbserial-A40111OI',
-    motor_on: false,
+    motor_on: true,
     gps_on: false
 };
 
@@ -156,12 +156,12 @@ var GpsCoordinates = function(params) {
 };
 
 // debug
-var debug = function() {
-    var gps = GpsCoordinates({speed:3.2, db: db});
-    gps.convert_coordinates('4220.1835', '-07105.3121');
-    gps.save();
-};
-setTimeout(debug, 1000*5)
+// var debug = function() {
+//     var gps = GpsCoordinates({speed:3.2, db: db});
+//     gps.convert_coordinates('4220.1835', '-07105.3121');
+//     gps.save();
+// };
+// setTimeout(debug, 1000*5)
 
 if (config.gps_on) {
     var gps_serial = new SerialPort(config.gps_serial, {
