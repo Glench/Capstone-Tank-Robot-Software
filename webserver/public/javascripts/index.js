@@ -19,7 +19,12 @@ $( "#speed" ).slider({
     value:4,
     min: 4,
     max: 6,
-    step: 1
+    step: 1,
+    change: function(evt, ui) {
+        // defocus the slider after changing speed so this doesn't interfere
+        // with trying to drive with the keyboard
+        $(ui.handle).blur()
+    }
 });
 
 
@@ -126,18 +131,17 @@ $('#controls .btn').mouseup(function(evt) {
         console.log(inputs)
     }
 });
+
+// send websocket event when pressing deploy button
 $('#map .btn').click(function(evt) {
     socket.emit('deploy_repeater');
 })
+
+// disable links we don't actaully want to do anything
 $('a[href$="#null"]').click(function(evt){
     evt.preventDefault();
     $(evt.target).blur();
 });
-
-// TODO:
-// fix left and right
-// fix forward to forward/left to forward
-// fix annoying left and right buttons after changing speed (defocus)
 
 var send_commands = function() {
     if (inputs['should_send']) {
@@ -146,4 +150,36 @@ var send_commands = function() {
     }
 };
 
-setInterval(send_commands, 100)
+setInterval(send_commands, 100);
+
+// the map controls
+var map = new OpenLayers.Map({
+    div: "js_map",
+    controls: [
+        new OpenLayers.Control.Attribution(),
+        new OpenLayers.Control.TouchNavigation({
+            dragPanOptions: {
+                enableKinetic: true
+            }
+        }),
+        new OpenLayers.Control.ZoomPanel()
+    ],
+    layers: [
+        new OpenLayers.Layer.OSM("OpenStreetMap", null, {
+            transitionEffect: "resize"
+        })
+    ],
+    zoom: 4,
+    center: new OpenLayers.LonLat(-71.059, 42.358)
+});
+var vectorLayer = new OpenLayers.Layer.Vector("Overlay");
+var feature = new OpenLayers.Feature.Vector(
+ new OpenLayers.Geometry.Point(-70, 42),
+ {some:'data'},
+ {externalGraphic: 'OpenLayers/img/marker.png', graphicHeight: 21, graphicWidth: 16});
+vectorLayer.addFeatures(feature);
+map.addLayer(vectorLayer);
+
+// styling map here because some default styles are weird
+$('.olControlZoomPanel').css('top', '10px');
+$('.olControlAttribution').css('bottom', 0);

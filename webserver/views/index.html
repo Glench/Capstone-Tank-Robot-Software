@@ -4,6 +4,7 @@
         <title>TANK ROBUT</title>
         <link rel="stylesheet" href="stylesheets/bootstrap.min.css" />
         <link rel="stylesheet" href="stylesheets/jquery-ui-1.8.18.custom.css" />
+        <link rel="stylesheet" href="OpenLayers/theme/default/style.css" />
         <style type="text/css">
             #camera {
                 width: 814px;
@@ -17,36 +18,38 @@
     </head>
     <body>
         <div class="container-fluid">
-            <div class="row">
+            <div class="row-fluid">
                 <div class="span10" id="camera">
                     <iframe src="http://{{camera_ip}}/serverpush.htm">
                         Loading...
                         If this does not load soon, make sure you are on the right network.
                     </iframe>
                 </div>
-                <div class="span3 well" id="controls" style="margin-top: 20px;">
-                    <div style="text-align: center;">
-                        <div>
-                            <a class="btn btn-large" data-key="38">&uarr;</a>
+                <div class="span3" style="margin-top: 20px;">
+                    <div id="controls" class="well">
+                        <div style="text-align: center;">
+                            <div>
+                                <a class="btn btn-large" data-key="38">&uarr;</a>
+                            </div>
+                            <div>
+                                <a class="btn btn-large" data-key="37">&larr;</a>
+                                <a class="btn btn-large" data-key="40">&darr;</a>
+                                <a class="btn btn-large" data-key="39">&rarr;</a>
+                            </div>
                         </div>
-                        <div>
-                            <a class="btn btn-large" data-key="37">&larr;</a>
-                            <a class="btn btn-large" data-key="40">&darr;</a>
-                            <a class="btn btn-large" data-key="39">&rarr;</a>
+                        <div id="speed" style="margin-top: 22px; margin-bottom: 10px"></div>
+                        <div id="speed_labels" style="position: relative;">
+                            <span style="position: absolute; left: 0;">Slow</span>
+                            <span style="position: absolute; left: 42%;">Medium</span>
+                            <span style="position: absolute; left: 96%;">Fast</span>
                         </div>
                     </div>
-                    <div id="speed" style="margin-top: 22px; margin-bottom: 10px"></div>
-                    <div id="speed_labels" style="position: relative;">
-                        <span style="position: absolute; left: 0;">Slow</span>
-                        <span style="position: absolute; left: 42%;">Medium</span>
-                        <span style="position: absolute; left: 96%;">Fast</span>
-                    </div>
-                </div>
-                <div class="span3 well" id="map">
-                    <div style="text-align: center;">
-                        <a href="#null" class="btn btn-primary" style="text-align: center;">Deploy Repeater</a>
-                    </div>
-                    <div>
+                    <div class="well" id="map">
+                        <div id="js_map" style="height: 200px;">
+                        </div>
+                        <div style="text-align: center; margin-top: 20px">
+                            <a href="#null" class="btn btn-primary btn-large" style="text-align: center;">Deploy Repeater</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -54,8 +57,9 @@
         </div>
 
         <script type="text/javascript" src='/javascripts/jquery-1.7.1.min.js'></script>
-        <script type="text/javascript" src="/socket.io/socket.io.js"></script>
         <script type="text/javascript" src='/javascripts/jquery-ui-1.8.18.custom.min.js'></script>
+        <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+        <script type="text/javascript" src="/OpenLayers/OpenLayers.js"></script>
         <script type="text/javascript" src='/javascripts/index.js'></script>
     </body>
 </html>
