@@ -1,19 +1,6 @@
 var coordinates = [];
-var socket = io.connect('http://192.168.10.220')
-// var socket = io.connect('http://localhost')
-
-socket.on('connect', function() {
-    console.log('websocket connect')
-});
-
-socket.on('gps_coordinate', function(data) {
-    coordinates.push(data)
-});
-
-socket.on('disconnect', function() {
-    console.log('websocket disconnect');
-    // alert('Lost connection with robot!');
-});
+// var socket = io.connect('http://192.168.10.220')
+var socket = io.connect('http://localhost')
 
 $( "#speed" ).slider({
     value:4,
@@ -118,7 +105,6 @@ $('#controls .btn').mousedown(function(evt) {
         evt.preventDefault();
         inputs[direction] = true;
         inputs['should_send'] = true;
-        console.log(inputs)
     }
 });
 $('#controls .btn').mouseup(function(evt) {
@@ -128,14 +114,8 @@ $('#controls .btn').mouseup(function(evt) {
         evt.preventDefault();
         inputs[direction] = false;
         inputs['should_send'] = false;
-        console.log(inputs)
     }
 });
-
-// send websocket event when pressing deploy button
-$('#map .btn').click(function(evt) {
-    socket.emit('deploy_repeater');
-})
 
 // disable links we don't actaully want to do anything
 $('a[href$="#null"]').click(function(evt){
@@ -169,17 +149,87 @@ var map = new OpenLayers.Map({
             transitionEffect: "resize"
         })
     ],
-    zoom: 4,
+    zoom: 8,
     center: new OpenLayers.LonLat(-71.059, 42.358)
+            .transform(
+                new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+                new OpenLayers.Projection("EPSG:900913") // to Spherical Mercator Projection
+            )
 });
-var vectorLayer = new OpenLayers.Layer.Vector("Overlay");
-var feature = new OpenLayers.Feature.Vector(
- new OpenLayers.Geometry.Point(-70, 42),
- {some:'data'},
- {externalGraphic: 'OpenLayers/img/marker.png', graphicHeight: 21, graphicWidth: 16});
-vectorLayer.addFeatures(feature);
-map.addLayer(vectorLayer);
+var markers_layer = new OpenLayers.Layer.Markers("Markers");
+markers_layer.id = 'Markers';
+var icon = new OpenLayers.Icon('/OpenLayers/img/marker-blue.png',
+    new OpenLayers.Size(21, 25),
+    new OpenLayers.Pixel(0, 0)
+);
+var repeater_icon = new OpenLayers.Icon('/OpenLayers/img/marker.png',
+    new OpenLayers.Size(21, 25),
+    new OpenLayers.Pixel(0, 0)
+);
+
+// debug
+var lonlat = new OpenLayers.LonLat(-71.059, 42.358);
+lonlat.transform(
+    new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+    new OpenLayers.Projection("EPSG:900913") // to Spherical Mercator Projection
+)
+var marker = new OpenLayers.Marker(lonlat, icon.clone())
+markers_layer.addMarker(marker)
+
+map.addLayer(markers_layer);
+
+// 'OpenLayers/img/marker.png'
 
 // styling map here because some default styles are weird
 $('.olControlZoomPanel').css('top', '10px');
 $('.olControlAttribution').css('bottom', 0);
+
+var GpsCoordinates = function(data) {
+    var projection1 = new OpenLayers.Projection("EPSG:4326"); // transform from WGS 1984
+    var projection2 = new OpenLayers.Projection("EPSG:900913"); // to Spherical Mercator Projection
+    return {
+        lat: data.latitude,
+        lon: data.longitude,
+        text: data.speed + ' knots at ' + data.timestamp,
+        _ol_lon_lat: function() {
+            // these are the 'normal' coordinates
+            // used in a function so the latest data is always used to generate
+            return new OpenLayers.LonLat(this.lon, this.lat);
+        },
+        ol_lon_lat: function() {
+            // these are the transformed coordinates to work with OSM
+            // used in a function so the latest data is always used to generate
+            return new OpenLayers.LonLat(this.lon, this.lat).transform(projection1, projection2);
+        }
+    }
+};
+
+socket.on('connect', function() {
+    console.log('websocket connect')
+    $(document).find('#controls .btn').removeClass('btn-danger');
+    $(document).find('#controls .status').hide();
+});
+
+socket.on('gps_coordinate', function(data) {
+    var gps_coordinate = GpsCoordinates(data);
+    coordinates.push(gps_coordinate);
+    var ol_coordinate = gps_coordinate.ol_lon_lat()
+    map.getLayer('Markers').addMarker(new OpenLayers.Marker(ol_coordinate, icon.clone()));
+    // set this to center of map
+    map.setCenter(ol_coordinate, map.getZoom(), false, false);
+});
+
+socket.on('disconnect', function() {
+    console.log('websocket disconnect');
+    $(document).find('#controls .btn').addClass('btn-danger');
+    $(document).find('#controls .status').show();
+});
+
+// send websocket event when pressing deploy button
+$('#map .btn').click(function(evt) {
+    // set the latest marker as a repeater
+    var markers = map.getLayer('Markers').markers;
+    markers[markers.length - 1].icon.setUrl(repeater_icon.url);
+    socket.emit('deploy_repeater');
+})
+
