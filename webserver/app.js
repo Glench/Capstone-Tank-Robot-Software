@@ -82,7 +82,9 @@ var config = {
     gps_on: false
 };
 
+db.run('CREATE TABLE IF NOT EXISTS movement (id INTEGER PRIMARY KEY, command TEXT, timestamp DATETIME default current_timestamp)');
 if (config.motor_on) {
+    app.set('should_rewind', true);
     var motor_serial = new SerialPort(config.motor_serial, {
         parser: serialport.parsers.readline("\n")
     });
@@ -93,13 +95,40 @@ var sio = io.listen(app)
 sio.sockets.on('connection', function(socket) {
     console.log('connect')
 
-    socket.on('disconnect', function(){console.log('disconnect')})
+    // make sure that if we're connected we don't keep rewinding commands
+    if (config.motor_on) {
+        app.set('should_rewind', true);
+    }
+
+    socket.on('soft_disconnect', function() {
+        console.log('soft_disconnect')
+        app.set('should_rewind', false);
+    });
+
+    socket.on('disconnect', function(){
+        console.log('disconnect', app.set('should_rewind'))
+        if (config.motor_on && app.set('should_rewind')) {
+            // 1000 rows is about the last 1 minute 40 seconds
+            db.each('SELECT * FROM movement ORDER BY id DESC limit 1000', function(err, movement) {
+                // TODO: add time check
+                // TODO: redo logic for should_rewind, it's WRONG now
+                // It's a stupid express convention to call 'set' it means 'get'.
+                // Also should not rerun commands if we've already reconnected.
+                if (!err && app.set('should_rewind')) {
+                    motor_serial.write('' + data['left'] + data['right'] + '0');
+                }
+            });
+        }
+    })
 
     socket.on('move', function (data) {
         console.log('movement command received', new Date(), data);
-        // make sure to write string and not numberic values
+        var command = '' + data['left'] + data['right'] + '0';
+        // log call movement commands
+        db.run('INSERT INTO movement (command) VALUES (?)', [command]);
         if (config.motor_on) {
-            motor_serial.write('' + data['left'] + data['right'] + '0');
+            // make sure to write string and not numberic values
+            motor_serial.write(command);
         }
     });
 

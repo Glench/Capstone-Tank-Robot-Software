@@ -1,6 +1,7 @@
 var coordinates = [];
-// var socket = io.connect('http://192.168.10.220')
-var socket = io.connect('http://localhost')
+var connect_options = {'sync disconnect on unload': false}
+// var socket = io.connect('http://192.168.10.220', connection_options)
+var socket = io.connect('http://localhost', connection_options);
 
 $( "#speed" ).slider({
     value:4,
@@ -223,6 +224,16 @@ socket.on('disconnect', function() {
     console.log('websocket disconnect');
     $(document).find('#controls .btn').addClass('btn-danger');
     $(document).find('#controls .status').show();
+});
+
+$(window).bind('beforeunload', function(evt) {
+    console.log('soft websocket disconnect')
+    // TODO make sure that when user decides to stay on page that we send another connect
+    socket.emit('soft_disconnect'); // let the server know this isn't a hard disconnect
+    return ''
+});
+$(window).bind('unload', function(evt) {
+    socket.disconnect();
 });
 
 // send websocket event when pressing deploy button
