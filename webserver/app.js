@@ -95,7 +95,7 @@ var sio = io.listen(app)
 sio.sockets.on('connection', function(socket) {
     console.log('connect')
 
-    // make sure that if we're connected we don't keep rewinding commands
+    // make sure that if we reconnected we don't keep rewinding commands
     if (config.motor_on) {
         app.set('should_rewind', true);
     }
@@ -106,20 +106,24 @@ sio.sockets.on('connection', function(socket) {
     });
 
     socket.on('disconnect', function(){
-        console.log('disconnect', app.set('should_rewind'))
+        console.log('disconnect')
         if (config.motor_on && app.set('should_rewind')) {
             // 1000 rows is about the last 1 minute 40 seconds
-            db.each('SELECT * FROM movement ORDER BY id DESC limit 1000', function(err, movement) {
-                // TODO: add time check
-                // TODO: redo logic for should_rewind, it's WRONG now
-                // It's a stupid express convention to call 'set' it means 'get'.
-                // Also should not rerun commands if we've already reconnected.
-                if (!err && app.set('should_rewind')) {
-                    motor_serial.write('' + data['left'] + data['right'] + '0');
-                }
-            });
+            var rewind = function() {
+                db.each('SELECT * FROM movement ORDER BY id DESC limit 1000', function(err, movement) {
+                    // TODO: add time check
+                    // TODO: redo logic for should_rewind, it's WRONG now
+                    // It's a stupid express convention to call 'set' it means 'get'.
+                    // Also should not rerun commands if we've already reconnected.
+                    if (!err && app.set('should_rewind')) {
+                        motor_serial.write('' + data['left'] + data['right'] + '0');
+                    }
+                });
+            };
+            // wait before rewinding in case this is a transient phenomenon
+            setTimeout(rewind, 1000*8);
         }
-    })
+    });
 
     socket.on('move', function (data) {
         console.log('movement command received', new Date(), data);
@@ -188,7 +192,7 @@ var GpsCoordinates = function(params) {
 
             // concat the two important parts
             this.latitude = lat_prefix + '.' + ((lat_suffix / 60) + '').split('.')[1];
-            this.longitude = lon_prefix + '.' + ((lon_prefix / 60) + '').split('.')[1];
+            this.longitude = lon_prefix + '.' + ((lon_suffix / 60) + '').split('.')[1];
         }
     };
 };
@@ -203,13 +207,14 @@ var GpsCoordinates = function(params) {
 
 if (config.gps_on) {
     var gps_serial = new SerialPort(config.gps_serial, {
-        parser: serialport.parsers.readline('\r'),
+        parser: serialport.parsers.readline('\r\n'),
         baudrate: 4800
     });
     gps_serial.on('data', function(data){
         // $GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A
         var gps_data_array = data.split(',');
-        if (gps_data_array[0] == '$GPRMC' && gps_data_array[2] == 'A') {
+        if (gps_data_array[0] == '$GPRMC') {
+        // if (gps_data_array[0] == '$GPRMC' && gps_data_array[2] == 'A') {
             var sign_convert = {
                 N: '',
                 S: '-',

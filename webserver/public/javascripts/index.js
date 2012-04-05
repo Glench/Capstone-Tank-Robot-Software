@@ -1,7 +1,8 @@
 var coordinates = [];
-var connect_options = {'sync disconnect on unload': false}
-// var socket = io.connect('http://192.168.10.220', connection_options)
-var socket = io.connect('http://localhost', connection_options);
+var connection_options = {'sync disconnect on unload': false}
+// var websocket_host = 'http://192.168.10.220';
+var websocket_host = 'http://localhost';
+var socket = io.connect(websocket_host, connection_options);
 
 $( "#speed" ).slider({
     value:4,
@@ -169,13 +170,13 @@ var repeater_icon = new OpenLayers.Icon('/OpenLayers/img/marker.png',
 );
 
 // debug
-var lonlat = new OpenLayers.LonLat(-71.059, 42.358);
-lonlat.transform(
-    new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
-    new OpenLayers.Projection("EPSG:900913") // to Spherical Mercator Projection
-)
-var marker = new OpenLayers.Marker(lonlat, icon.clone())
-markers_layer.addMarker(marker)
+// var lonlat = new OpenLayers.LonLat(-71.059, 42.358);
+// lonlat.transform(
+//     new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+//     new OpenLayers.Projection("EPSG:900913") // to Spherical Mercator Projection
+// )
+// var marker = new OpenLayers.Marker(lonlat, icon.clone())
+// markers_layer.addMarker(marker)
 
 map.addLayer(markers_layer);
 
@@ -238,7 +239,7 @@ $(window).bind('unload', function(evt) {
 
 // send websocket event when pressing deploy button
 $('#map .btn').click(function(evt) {
-    // set the latest marker as a repeater
+    // redraw the latest marker as a repeater
     var markers = map.getLayer('Markers').markers;
     markers[markers.length - 1].icon.setUrl(repeater_icon.url);
     socket.emit('deploy_repeater');
