@@ -77,9 +77,9 @@ app.get('/', routes.index);
 // local config
 var config = {
     motor_serial: "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A600cJpP-if00-port0",
-    gps_serial: '/dev/cu.usbserial-A40111OI',
+    gps_serial: '/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A40111OI-if00-port0', //'/dev/cu.usbserial-A40111OI',
     motor_on: true,
-    gps_on: false
+    gps_on: true
 };
 
 db.run('CREATE TABLE IF NOT EXISTS movement (id INTEGER PRIMARY KEY, command TEXT, timestamp DATETIME default current_timestamp)');
@@ -236,8 +236,7 @@ if (config.gps_on) {
     gps_serial.on('data', function(data){
         // $GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A
         var gps_data_array = data.split(',');
-        if (gps_data_array[0] == '$GPRMC') {
-        // if (gps_data_array[0] == '$GPRMC' && gps_data_array[2] == 'A') {
+        if (gps_data_array[0] == '$GPRMC' && gps_data_array[2] == 'A') {
             var sign_convert = {
                 N: '',
                 S: '-',
