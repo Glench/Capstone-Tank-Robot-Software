@@ -108,15 +108,38 @@ sio.sockets.on('connection', function(socket) {
     socket.on('disconnect', function(){
         console.log('disconnect')
         if (config.motor_on && app.set('should_rewind')) {
+            console.log('reversing in 8 seconds! :O')
             // 1000 rows is about the last 1 minute 40 seconds
             var rewind = function() {
-                db.each('SELECT * FROM movement ORDER BY id DESC limit 1000', function(err, movement) {
-                    // TODO: add time check
-                    // TODO: redo logic for should_rewind, it's WRONG now
-                    // It's a stupid express convention to call 'set' it means 'get'.
+                var reverse_movement = function(movement) {
+                    var command = movement.split('');
+                    var reverse_command = [];
+                    var forward_backward_map = {
+                        '6': 0,
+                        '5': 1,
+                        '4': 2,
+                        '0': 6,
+                        '1': 5,
+                        '2': 4,
+                    };
+                    // only first 2 parts of string are motor movement, don't
+                    // want to repeat or translate repeater deployment
+                    for (var i = 0; i < 2; ++i) {
+                        reverse_command.push(forward_backward_map[command[i]]);
+                    }
+                    reverse_command.push('0')
+                    return reverse_command.join('');
+                };
+                // select only from most recent commands in 5 minutes
+                var d1 = new Date (),
+                d2 = new Date ( d1 );
+                d2.setMinutes ( d1.getMinutes() - 5 );
+                var sqlite_dt = d2.toISOString().replace('Z', '').replace('T', ' ');
+                db.each('SELECT * FROM movement WHERE timestamp > ? ORDER BY id DESC limit 1000', [sqlite_dt], function(err, movement) {
+                    // It's a stupid express convention to call 'set' when it means 'get'.
                     // Also should not rerun commands if we've already reconnected.
                     if (!err && app.set('should_rewind')) {
-                        motor_serial.write('' + data['left'] + data['right'] + '0');
+                        motor_serial.write(reverse_movement(movement.command));
                     }
                 });
             };

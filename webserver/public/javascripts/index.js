@@ -1,7 +1,7 @@
 var coordinates = [];
 var connection_options = {'sync disconnect on unload': false}
-// var websocket_host = 'http://192.168.10.220';
-var websocket_host = 'http://localhost';
+var websocket_host = 'http://192.168.10.170';
+// var websocket_host = 'http://localhost';
 var socket = io.connect(websocket_host, connection_options);
 
 $( "#speed" ).slider({
@@ -119,6 +119,26 @@ $('#controls .btn').mouseup(function(evt) {
     }
 });
 
+// ipad controls
+$('#controls .btn').bind('touchstart', function(evt) {
+    var $btn = $(evt.target);
+    var direction = key_map[$btn.data('key')];
+    if (direction in inputs && !inputs[direction]) {
+        evt.preventDefault();
+        inputs[direction] = true;
+        inputs['should_send'] = true;
+    }
+});
+$('#controls .btn').bind('touchend', function(evt) {
+    var $btn = $(evt.target);
+    var direction = key_map[$btn.data('key')];
+    if (direction in inputs && inputs[direction]) {
+        evt.preventDefault();
+        inputs[direction] = false;
+        inputs['should_send'] = false;
+    }
+});
+
 // disable links we don't actaully want to do anything
 $('a[href$="#null"]').click(function(evt){
     evt.preventDefault();
@@ -179,8 +199,6 @@ var repeater_icon = new OpenLayers.Icon('/OpenLayers/img/marker.png',
 // markers_layer.addMarker(marker)
 
 map.addLayer(markers_layer);
-
-// 'OpenLayers/img/marker.png'
 
 // styling map here because some default styles are weird
 $('.olControlZoomPanel').css('top', '10px');
