@@ -78,9 +78,9 @@ app.get('/', routes.index);
 var config = {
     // motor_serial: '/dev/cu.usbserial-A600cJpP',
     // gps_serial: '/dev/cu.usbserial-A40111OI',
-    // motor_on: true,
+    // motor_on: false,
     // gps_on: false,
-    // scrape_ddwrt: false
+    // scrape_ddwrt: true
     motor_serial: "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A600cJpP-if00-port0",
     gps_serial: '/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A40111OI-if00-port0',
     motor_on: true,
@@ -281,44 +281,51 @@ if (config.scrape_ddwrt) {
             input: false,
             run: function (url) {
                 var self = this;
-                var url = 'localhost:3000/ddwrt.html';
+                var url = '192.168.1.1/Info.live.htm';
                 self.getHtml(url, function(err, $) {
                     if (!err) {
-                        $('#wds tr').each(function(i) {
-                            var $tr = $(this);
-                            if ($tr.text().indexOf('Repeater 1') != -1) {
-                                var output = {
-                                    num: 1,
-                                    percent: parseInt($tr.find('.meter .text').text())
-                                }
-                                self.emit(output)
+                        var text = $('body').text();
+                        var base_index = text.indexOf('Repeater 1","');
+                        // these are magic constants we reverse-engineered from dd-wrt
+                        var percent = parseInt(text.slice(base_index+13, base_index+13+3)) * 1.24 + 116;
+                        if (base_index != -1) {
+                            var output = {
+                                num: 1,
+                                percent: percent
                             }
-                        });
+                            self.emit(output)
+                        } else {
+                            self.exit({'err': 'not present', 'num': 2});
+                        }
                     } else {
                         self.exit({'err': err, 'num': 1});
                     }
                 });
             }
         });
+
         // look at repeater2 to repeater 1 strength
         // copy and paste because I can't figure out why an array in 'input' won't work
         var job2 = new nodeio.Job({jsdom: true}, {
             input: false,
             run: function (url) {
                 var self = this;
-                var url = 'localhost:3000/ddrt.html';
+                var url = '192.168.1.2/Info.live.htm';
                 self.getHtml(url, function(err, $) {
                     if (!err) {
-                        $('#wds tr').each(function(i) {
-                            var $tr = $(this);
-                            if ($tr.text().indexOf('Repeater 2') != -1) {
-                                var output = {
-                                    num: 1,
-                                    percent: parseInt($tr.find('.meter .text').text())
-                                }
-                                self.emit(output)
+                        var text = $('body').text();
+                        var base_index = text.indexOf('Repeater 2","');
+                        // these are magic constants we reverse-engineered from dd-wrt
+                        var percent = parseInt(text.slice(base_index+13, base_index+13+3)) * 1.24 + 116;
+                        if (base_index != -1) {
+                            var output = {
+                                num: 1,
+                                percent: percent
                             }
-                        });
+                            self.emit(output)
+                        } else {
+                            self.exit({'err': 'not present', 'num': 2});
+                        }
                     } else {
                         self.exit({'err': err, 'num': 2});
                     }
