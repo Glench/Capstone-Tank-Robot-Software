@@ -115,7 +115,8 @@ sio.sockets.on('connection', function(socket) {
 
     socket.on('disconnect', function(){
         console.log('disconnect')
-        if (config.motor_on && app.set('should_rewind')) {
+        if (config.motor_on && app.set('should_rewind') && false) {
+            // TODO: remove and test rewind code
             console.log('reversing in 8 seconds! :O')
             // 1000 rows is about the last 1 minute 40 seconds
             var rewind = function() {
