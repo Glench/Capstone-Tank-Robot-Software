@@ -1,6 +1,6 @@
 var coordinates = [];
 var connection_options = {'sync disconnect on unload': false}
-var websocket_host = 'http://192.168.10.170';
+var websocket_host = 'http://192.168.1.42';
 // var websocket_host = 'http://localhost';
 var socket = io.connect(websocket_host, connection_options);
 
@@ -301,8 +301,8 @@ $(window).bind('unload', function(evt) {
 // send websocket event when pressing deploy button
 $('#map .btn').click(function(evt) {
     // redraw the latest marker as a repeater
+    socket.emit('deploy_repeater');
     var markers = map.getLayer('Markers').markers;
     markers[markers.length - 1].icon.setUrl(repeater_icon.url);
-    socket.emit('deploy_repeater');
 })
 

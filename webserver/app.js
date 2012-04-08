@@ -84,7 +84,7 @@ var config = {
     motor_serial: "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A600cJpP-if00-port0",
     gps_serial: '/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A40111OI-if00-port0',
     motor_on: true,
-    gps_on: true,
+    gps_on: false,
     scrape_ddwrt: true
 };
 
@@ -115,7 +115,8 @@ sio.sockets.on('connection', function(socket) {
 
     socket.on('disconnect', function(){
         console.log('disconnect')
-        if (config.motor_on && app.set('should_rewind')) {
+        if (config.motor_on && app.set('should_rewind') && false) {
+            // TODO: remove and test rewind code
             console.log('reversing in 8 seconds! :O')
             // 1000 rows is about the last 1 minute 40 seconds
             var rewind = function() {
@@ -179,6 +180,7 @@ sio.sockets.on('connection', function(socket) {
         if (config.motor_on) {
             db.all('select * from gps where is_repeater = 1', function(err, rows) {
                 if (num_repeaters == 0) {
+                    motor_serial.write('33a');
                     motor_serial.write('33a');
                 } else {
                     motor_serial.write('33b');
