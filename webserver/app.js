@@ -273,10 +273,6 @@ if (config.gps_on) {
 }
 
 if (config.scrape_ddwrt) {
-    for (var i = 0; i < config.num_repeaters; ++i) {
-        // base station is hard-coded, each subsequent is 1
-        config.repeater_ips.push('192.168.1.' + (i+2))
-    }
     var scrape = function() {
         // look at base to repeater 1 strength
         var job1 = new nodeio.Job({jsdom: true}, {
@@ -284,12 +280,17 @@ if (config.scrape_ddwrt) {
             run: function (url) {
                 var self = this;
                 var url = '192.168.1.1/Info.live.htm';
-                self.getHtml(url, function(err, $) {
+                self.get(url, function(err, data) {
                     if (!err) {
-                        var text = $('body').text();
+                        var text = data;
                         var base_index = text.indexOf('Repeater 1","');
                         // these are magic constants we reverse-engineered from dd-wrt
-                        var percent = parseInt(text.slice(base_index+13, base_index+13+3)) * 1.24 + 116;
+                        var signal = parseInt(text.slice(base_index+13, base_index+13+3))
+                        if (signal) {
+                            var percent = signal * 1.24 + 116;
+                        } else {
+                            var percent = signal;
+                        }
                         if (base_index != -1) {
                             var output = {
                                 num: 1,
@@ -313,15 +314,20 @@ if (config.scrape_ddwrt) {
             run: function (url) {
                 var self = this;
                 var url = '192.168.1.2/Info.live.htm';
-                self.getHtml(url, function(err, $) {
+                self.get(url, function(err, data) {
                     if (!err) {
-                        var text = $('body').text();
+                        var text = data;
                         var base_index = text.indexOf('Repeater 2","');
                         // these are magic constants we reverse-engineered from dd-wrt
-                        var percent = parseInt(text.slice(base_index+13, base_index+13+3)) * 1.24 + 116;
+                        var signal = parseInt(text.slice(base_index+13, base_index+13+3));
+                        if (signal) {
+                            var percent = signal * 1.24 + 116;
+                        } else {
+                            var percent = signal;
+                        }
                         if (base_index != -1) {
                             var output = {
-                                num: 1,
+                                num: 2,
                                 percent: percent
                             }
                             self.emit(output)
