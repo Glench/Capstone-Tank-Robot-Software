@@ -167,6 +167,7 @@ var map = new OpenLayers.Map({
         new OpenLayers.Control.ZoomPanel()
     ],
     layers: [
+        // new OpenLayers.Layer.OSM("OpenStreetMap", '/map_tiles/${z}/${x}/${y}.png', {
         new OpenLayers.Layer.OSM("OpenStreetMap", null, {
             transitionEffect: "resize"
         })
@@ -226,8 +227,38 @@ var GpsCoordinates = function(data) {
 
 socket.on('connect', function() {
     console.log('websocket connect')
+    // remove error state for controls
+    $(document).find('.btn').removeClass('disabled');
     $(document).find('#controls .btn').removeClass('btn-danger');
     $(document).find('#controls .status').hide();
+
+    // remove error state for repeaters
+    $(document).find('#repeaters .repeater').each(function(i) {
+        var $repeater = $(this);
+        $repeater.find('.disconnect').remove();
+        $repeater.find('.signal-strength').show();
+    });
+});
+
+socket.on('disconnect', function() {
+    console.log('websocket disconnect');
+    // add error state for controls
+    $(document).find('.btn').addClass('disabled');
+    $(document).find('#controls .btn').addClass('btn-danger');
+    $(document).find('#controls .status').show();
+
+    // add error state for repeaters
+    $(document).find('#repeaters .repeater').each(function(i) {
+        var $repeater = $(this);
+        // show error bar when disconnected and hide actual progress bar
+        $repeater.find('.signal-strength').hide();
+        $repeater.find('.connecting').remove();
+
+        var $disconnect_strength_bar = $('#repeaters .disconnect:first').clone();
+        $disconnect_strength_bar.show();
+        $repeater.append($disconnect_strength_bar)
+    });
+
 });
 
 socket.on('gps_coordinate', function(data) {
@@ -239,10 +270,22 @@ socket.on('gps_coordinate', function(data) {
     map.setCenter(ol_coordinate, map.getZoom(), false, false);
 });
 
-socket.on('disconnect', function() {
-    console.log('websocket disconnect');
-    $(document).find('#controls .btn').addClass('btn-danger');
-    $(document).find('#controls .status').show();
+socket.on('repeater_strength', function(repeater) {
+    var $repeater = $('#repeaters #repeater'+repeater.num);
+    if ('err' in repeater) {
+        if ($repeater.find('.connecting').length) {
+            return;
+        }
+
+        // show connecting
+        $repeater.find('.signal-strength').hide();
+        var $connecting = $('#repeaters .connecting:first').clone();
+        $connecting.show();
+        $repeater.append($connecting);
+    } else {
+        $repeater.find('.connecting').remove();
+        $repeater.find('.signal-strength .bar').width(repeater.percent+'%');
+    }
 });
 
 $(window).bind('beforeunload', function(evt) {

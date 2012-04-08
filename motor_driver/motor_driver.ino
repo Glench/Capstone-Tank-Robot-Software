@@ -42,13 +42,13 @@ void serialEvent() {
     if (Serial.available() > 2) {
         motor_iterator.run(Serial.read(), Serial.read());
         int solenoid = Serial.read();
-        if (solenoid == 1) {
+        if (solenoid == 'a') {
             digitalWrite(repeater_1_pin, 255);
-            delay(1000*3);
-            digitalWrite(repeater_1_pin, 0);
-        } else if (solenoid == 2) {
-            digitalWrite(repeater_1_pin, 255);
-            delay(1000*3);
+            delay(1000*1);
+            analogWrite(repeater_1_pin, 0);
+        } else if (solenoid == 'b') {
+            analogWrite(repeater_2_pin, 255);
+            delay(1000*1);
             digitalWrite(repeater_2_pin, 0);
         }
     }

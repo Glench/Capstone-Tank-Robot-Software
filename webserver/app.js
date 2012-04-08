@@ -6,11 +6,11 @@ var express = require('express')
   , routes = require('./routes')
   , io = require('socket.io')
   , mustache = require('mustache')
-
-var sqlite = require('sqlite3').verbose();
-var db = new sqlite.Database('db');
-var serialport = require('serialport');
-var SerialPort = serialport.SerialPort; // localize object constructor
+  , nodeio = require('node.io')
+  , sqlite = require('sqlite3').verbose()
+  , db = new sqlite.Database('db')
+  , serialport = require('serialport')
+  , SerialPort = serialport.SerialPort // localize object constructor
 
 var app = module.exports = express.createServer();
 
@@ -76,10 +76,16 @@ app.get('/', routes.index);
 
 // local config
 var config = {
+    // motor_serial: '/dev/cu.usbserial-A600cJpP',
+    // gps_serial: '/dev/cu.usbserial-A40111OI',
+    // motor_on: true,
+    // gps_on: false,
+    // scrape_ddwrt: false
     motor_serial: "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A600cJpP-if00-port0",
-    gps_serial: '/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A40111OI-if00-port0', //'/dev/cu.usbserial-A40111OI',
+    gps_serial: '/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A40111OI-if00-port0',
     motor_on: true,
-    gps_on: true
+    gps_on: true,
+    scrape_ddwrt: true
 };
 
 db.run('CREATE TABLE IF NOT EXISTS movement (id INTEGER PRIMARY KEY, command TEXT, timestamp DATETIME default current_timestamp)');
@@ -91,6 +97,8 @@ if (config.motor_on) {
 }
 
 // handle websocket stuff
+var num_repeaters = 0;
+
 var sio = io.listen(app)
 sio.sockets.on('connection', function(socket) {
     console.log('connect')
@@ -170,7 +178,14 @@ sio.sockets.on('connection', function(socket) {
 
         if (config.motor_on) {
             db.all('select * from gps where is_repeater = 1', function(err, rows) {
-                motor_serial.write('00' + (rows.length+1))
+                if (num_repeaters == 0) {
+                    motor_serial.write('33a');
+                } else {
+                    motor_serial.write('33b');
+                }
+                num_repeaters = num_repeaters + 1;
+
+                // motor_serial.write('00' + (rows.length+1))
             });
         }
     });
@@ -253,6 +268,77 @@ if (config.gps_on) {
             gps_coordinates.save();
         }
     });
+}
+
+if (config.scrape_ddwrt) {
+    for (var i = 0; i < config.num_repeaters; ++i) {
+        // base station is hard-coded, each subsequent is 1
+        config.repeater_ips.push('192.168.1.' + (i+2))
+    }
+    var scrape = function() {
+        // look at base to repeater 1 strength
+        var job1 = new nodeio.Job({jsdom: true}, {
+            input: false,
+            run: function (url) {
+                var self = this;
+                var url = 'localhost:3000/ddwrt.html';
+                self.getHtml(url, function(err, $) {
+                    if (!err) {
+                        $('#wds tr').each(function(i) {
+                            var $tr = $(this);
+                            if ($tr.text().indexOf('Repeater 1') != -1) {
+                                var output = {
+                                    num: 1,
+                                    percent: parseInt($tr.find('.meter .text').text())
+                                }
+                                self.emit(output)
+                            }
+                        });
+                    } else {
+                        self.exit({'err': err, 'num': 1});
+                    }
+                });
+            }
+        });
+        // look at repeater2 to repeater 1 strength
+        // copy and paste because I can't figure out why an array in 'input' won't work
+        var job2 = new nodeio.Job({jsdom: true}, {
+            input: false,
+            run: function (url) {
+                var self = this;
+                var url = 'localhost:3000/ddrt.html';
+                self.getHtml(url, function(err, $) {
+                    if (!err) {
+                        $('#wds tr').each(function(i) {
+                            var $tr = $(this);
+                            if ($tr.text().indexOf('Repeater 2') != -1) {
+                                var output = {
+                                    num: 1,
+                                    percent: parseInt($tr.find('.meter .text').text())
+                                }
+                                self.emit(output)
+                            }
+                        });
+                    } else {
+                        self.exit({'err': err, 'num': 2});
+                    }
+                });
+            }
+        });
+        var start_job = function(job) {
+            nodeio.start(job, function (err, output) {
+                if (!err) {
+                    // not sure why this sends an array
+                    sio.sockets.emit('repeater_strength', output[0])
+                } else {
+                    sio.sockets.emit('repeater_strength', err)
+                }
+            }, true);
+        };
+        start_job(job1);
+        start_job(job2);
+    }
+    setInterval(scrape, 5*1000)
 }
 
 

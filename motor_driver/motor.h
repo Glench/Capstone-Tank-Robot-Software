@@ -1,6 +1,7 @@
 #ifndef Motor_h
 #define Motor_h
 #include "Arduino.h"
+
 class Motor {
     // class responsible for controlling invidual motors
     int highPin_;
