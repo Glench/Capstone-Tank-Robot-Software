@@ -18,10 +18,10 @@ int Motor::normalize_speed_(int input) {
     // 255 is 100% duty cycle
     if (input == 2 || input == 4) {
         return 85; // 255 / 3
-//    } else if (input == 1 || input == 5) {
-//        return 127; // 255 / 2
-//    } else if (input == 0 || input == 6) {
-//        return 255; // 255 / 1
+    } else if (input == 1 || input == 5) {
+        return 127; // 255 / 2
+    } else if (input == 0 || input == 6) {
+        return 255; // 255 / 1
     } else {
         // remember if -1 over serial, that means nothing found
         return 0;

@@ -76,13 +76,13 @@ app.get('/', routes.index);
 
 // local config
 var config = {
-    // motor_serial: '/dev/cu.usbserial-A600cJpP',
-    // gps_serial: '/dev/cu.usbserial-A40111OI',
     // motor_on: false,
     // gps_on: false,
     // scrape_ddwrt: true
-    motor_serial: "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A600cJpP-if00-port0",
-    gps_serial: '/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A40111OI-if00-port0',
+    // motor_serial: '/dev/cu.usbmodemfa141', // mac
+    // gps_serial: '/dev/cu.usbserial-A40111OI', // mac
+    motor_serial: "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A600cJpP-if00-port0", // eee
+    gps_serial: '/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A40111OI-if00-port0', // eee
     motor_on: true,
     gps_on: false,
     scrape_ddwrt: true

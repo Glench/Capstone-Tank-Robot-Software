@@ -7,20 +7,20 @@
 #include "Servo.h"
 
 // left motor
-int HighPin_left     = 1; // always keep this one high, don't need this now
-int DisablePin_left  = 4; // disables the h bridges, usually keep this low
-int ForwardPin_left  = 3;
-int BackwardPin_left = 5;
+int HighPin_left     = 9; // always keep this one high, don't need this now
+int DisablePin_left  = 36; // disables the h bridges, usually keep this low
+int ForwardPin_left  = 12;
+int BackwardPin_left = 10;
 
 // right motor
-int HighPin_right     = 13; // always keep this one high
-int DisablePin_right  = 12; // disables the h bridges, usually keep this low
-int ForwardPin_right  = 11;
-int BackwardPin_right = 6;
+int HighPin_right     = 9; // always keep this one high
+int DisablePin_right  = 37; // disables the h bridges, usually keep this low
+int ForwardPin_right  = 6;
+int BackwardPin_right = 8;
 
 // solenoids
-int repeater_1_pin = A0;
-int repeater_2_pin = A1;
+int repeater_1_pin = 41;
+int repeater_2_pin = 42;
 
 void setup()  {
     Serial.begin(9600);

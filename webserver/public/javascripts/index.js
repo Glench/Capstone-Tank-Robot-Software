@@ -1,7 +1,7 @@
 var coordinates = [];
 var connection_options = {'sync disconnect on unload': false}
-var websocket_host = 'http://192.168.1.42';
-// var websocket_host = 'http://localhost';
+var websocket_host = 'http://192.168.1.42'; // eee
+// var websocket_host = 'http://localhost'; // mac
 var socket = io.connect(websocket_host, connection_options);
 
 $( "#speed" ).slider({
