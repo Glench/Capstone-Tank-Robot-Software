@@ -94,6 +94,7 @@ if (config.motor_on) {
     var motor_serial = new SerialPort(config.motor_serial, {
         parser: serialport.parsers.readline("\n")
     });
+    motor_serial.on('data', console.log);
 }
 
 // handle websocket stuff
