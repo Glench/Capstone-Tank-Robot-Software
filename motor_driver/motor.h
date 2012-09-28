@@ -15,6 +15,7 @@ class Motor {
     private:
         int normalize_speed_(int);
         bool direction_(int);
+        unsigned long last_run_;
     public:
         void move(int);
         Motor(int, int, int, int);

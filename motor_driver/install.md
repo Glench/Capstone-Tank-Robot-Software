@@ -5,5 +5,6 @@ To install arduino:
     
 Arduino specs:
 
-* on glen's mac device is /dev/tty.usbserial-A600cJpP
-* arduino type is arduino duelmilanovae
+We have the Arduino Mega 2560. Choose this in the arduino software with tools -> board.
+
+Then choose the serial port. On glen's macbook air, it's the /dev/tty.usbmodem one.

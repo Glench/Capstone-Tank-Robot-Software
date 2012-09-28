@@ -10,6 +10,7 @@ Motor::Motor(int highPin, int disablePin, int forwardPin, int backwardPin) {
     forward_ = true;
     backward_ = false;
     num_speeds_ = 3;
+    last_run_ = millis();
 }
 
 int Motor::normalize_speed_(int input) {
@@ -17,11 +18,14 @@ int Motor::normalize_speed_(int input) {
     // TODO: make this use division instead of constants
     // 255 is 100% duty cycle
     if (input == 2 || input == 4) {
-        return 85; // 255 / 3
+        // return 85; // 255 / 3
+        return 42; // scale back by half for new motors
     } else if (input == 1 || input == 5) {
-        return 127; // 255 / 2
+        // return 127; // 255 / 2
+        return 63; // scale back by half for new motors
     } else if (input == 0 || input == 6) {
-        return 255; // 255 / 1
+        // return 255; // 255 / 1
+        return 127; // scale back by half for new motors
     } else {
         // remember if -1 over serial, that means nothing found
         return 0;
@@ -40,6 +44,25 @@ bool Motor::direction_(int input) {
 void Motor::move(int speed) {
     bool direction = direction_(speed);
     int new_speed = normalize_speed_(speed);
+    // ramp up linearly
+    if (millis() - last_run_ > 800) {
+        // for (int i = 0; i <= new_speed; i=i+10) {
+        for (int i = 0; i <= new_speed; i=i+5) { // more ramping for new motors
+            if (direction == forward_) {
+                analogWrite(highPin_, 255);
+                analogWrite(forwardPin_, i);
+                analogWrite(backwardPin_, 0);
+                analogWrite(disablePin_, 0);
+            } else {
+                analogWrite(highPin_, 255);
+                analogWrite(forwardPin_, 0);
+                analogWrite(backwardPin_, i);
+                analogWrite(disablePin_, 0);
+            }
+            delay(2); // may need to take this out
+        }
+    }
+    // set final speed
     if (direction == forward_) {
         analogWrite(highPin_, 255);
         analogWrite(forwardPin_, new_speed);
@@ -51,6 +74,20 @@ void Motor::move(int speed) {
         analogWrite(backwardPin_, new_speed);
         analogWrite(disablePin_, 0);
     }
+    last_run_ = millis();
+
+    // good code
+    // if (direction == forward_) {
+    //     analogWrite(highPin_, 255);
+    //     analogWrite(forwardPin_, new_speed);
+    //     analogWrite(backwardPin_, 0);
+    //     analogWrite(disablePin_, 0);
+    // } else {
+    //     analogWrite(highPin_, 255);
+    //     analogWrite(forwardPin_, 0);
+    //     analogWrite(backwardPin_, new_speed);
+    //     analogWrite(disablePin_, 0);
+    // }
 }
 
 // see http://arduinoetcetera.blogspot.com/2011/01/classes-within-classes-initialiser.html
