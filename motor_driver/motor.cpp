@@ -18,14 +18,11 @@ int Motor::normalize_speed_(int input) {
     // TODO: make this use division instead of constants
     // 255 is 100% duty cycle
     if (input == 2 || input == 4) {
-        // return 85; // 255 / 3
-        return 42; // scale back by half for new motors
+        return 85; // 255 / 3
     } else if (input == 1 || input == 5) {
-        // return 127; // 255 / 2
-        return 63; // scale back by half for new motors
+        return 127; // 255 / 2
     } else if (input == 0 || input == 6) {
-        // return 255; // 255 / 1
-        return 127; // scale back by half for new motors
+        return 255; // 255 / 1
     } else {
         // remember if -1 over serial, that means nothing found
         return 0;
@@ -47,7 +44,7 @@ void Motor::move(int speed) {
     // ramp up linearly
     if (millis() - last_run_ > 800) {
         // for (int i = 0; i <= new_speed; i=i+10) {
-        for (int i = 0; i <= new_speed; i=i+5) { // more ramping for new motors
+        for (int i = 0; i <= new_speed; i=i+10) { // more ramping for new motors
             if (direction == forward_) {
                 analogWrite(highPin_, 255);
                 analogWrite(forwardPin_, i);
